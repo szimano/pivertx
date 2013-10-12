@@ -17,11 +17,6 @@ package org.szimano;
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
-import com.pi4j.io.gpio.GpioPinDigitalOutput;
-import com.pi4j.io.gpio.PinState;
-import com.pi4j.io.gpio.RaspiPin;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.platform.Verticle;
@@ -29,36 +24,17 @@ import org.vertx.java.platform.Verticle;
 /*
 This is a simple Java verticle which receives `ping` messages on the event bus and sends back `pong` replies
  */
-public class PingVerticle extends Verticle {
+public class ReactVerticle extends Verticle {
 
     public void start() {
 
-        // create gpio controller
-        final GpioController gpio = GpioFactory.getInstance();
-
-        // provision gpio pin #01 as an output pin and turn on
-        final GpioPinDigitalOutput pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_00, "MyLED", PinState.HIGH);
-        System.out.println("--> GPIO state should be: ON");
-
-        try {
-            Thread.sleep(3000l);
-        } catch (InterruptedException e) {
-
-        }
-
-        pin.setState(PinState.LOW);
-
-        System.out.println("--> GPIO state should be: OFF");
-
-        vertx.eventBus().registerHandler("ping-address", new Handler<Message<String>>() {
+        vertx.eventBus().registerHandler("buttonbus", new Handler<Message<String>>() {
             @Override
             public void handle(Message<String> message) {
-                message.reply("pong!");
-                container.logger().info("Sent back pong");
+                container.logger().info("Got state: " + message.body());
+
+                vertx.eventBus().send("outputbus", message.body());
             }
         });
-
-        container.logger().info("PingVerticle started");
-
     }
 }

@@ -19,6 +19,7 @@ package org.szimano;
 
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
+import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
@@ -29,36 +30,36 @@ import org.vertx.java.platform.Verticle;
 /*
 This is a simple Java verticle which receives `ping` messages on the event bus and sends back `pong` replies
  */
-public class PstrykVerticle extends Verticle {
+public class HardwareVerticle extends Verticle {
 
     public void start() {
 
         // create gpio controller
         final GpioController gpio = GpioFactory.getInstance();
 
-        // provision gpio pin #01 as an output pin and turn on
-        final GpioPinDigitalOutput pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_00, "MyLED", PinState.HIGH);
-        System.out.println("--> GPIO state should be: ON");
+        System.out.println("GPIO PSTRYK LOADED");
 
-        try {
-            Thread.sleep(3000l);
-        } catch (InterruptedException e) {
+        final GpioPinDigitalInput pin = gpio.provisionDigitalInputPin(RaspiPin.GPIO_02, "MyPstryk");
 
-        }
-
-        pin.setState(PinState.LOW);
-
-        System.out.println("--> GPIO state should be: OFF");
-
-        vertx.eventBus().registerHandler("ping-address", new Handler<Message<String>>() {
+        vertx.setPeriodic(100, new Handler<Long>() {
             @Override
-            public void handle(Message<String> message) {
-                message.reply("pong!");
-                container.logger().info("Sent back pong");
+            public void handle(Long timerID) {
+                vertx.eventBus().send("buttonbus", String.valueOf(pin.getState().getValue()));
             }
         });
 
-        container.logger().info("PingVerticle started");
+        final GpioPinDigitalOutput ledPin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_00, "MyLED", PinState.LOW);
+        final GpioPinDigitalOutput bzykPin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_03, "MyBzyk", PinState.LOW);
 
+        vertx.eventBus().registerHandler("outputbus", new Handler<Message<String>>() {
+            @Override
+            public void handle(Message<String> message) {
+                container.logger().info("Got state: " + message.body());
+
+                ledPin.setState(PinState.getState(Integer.parseInt(message.body())));
+                bzykPin.setState(PinState.getState(Integer.parseInt(message.body())));
+
+            }
+        });
     }
 }

@@ -1,4 +1,4 @@
-package org.szimano;
+package org.szimano.game;
 /*
  * Copyright 2013 Red Hat, Inc.
  *
@@ -17,17 +17,34 @@ package org.szimano;
  * @author <a href="http://tfox.org">Tim Fox</a>
  */
 
+import org.vertx.java.core.Handler;
 import org.vertx.java.platform.Verticle;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /*
 This is a simple Java verticle which receives `ping` messages on the event bus and sends back `pong` replies
  */
-public class StarterVerticle extends Verticle {
+public class ScoreCheckVerticle extends Verticle {
 
     public void start() {
 
-        getContainer().deployVerticle("org.szimano.HardwareVerticle");
-        getContainer().deployVerticle("org.szimano.ReactVerticle");
+        final AtomicInteger lastPoints = new AtomicInteger(0);
+
+        vertx.setPeriodic(10, new Handler<Long>() {
+            @Override
+            public void handle(Long timerID) {
+                Integer points = (Integer) vertx.sharedData().getMap(GameSolverVerticle.PIGAME).get(GameSolverVerticle.POINTS);
+
+                if (points < 0) {
+                    getContainer().logger().info("Die MF Die");
+                    System.exit(1);
+                } else if (lastPoints.get() != points) {
+                    lastPoints.set(points);
+                    getContainer().logger().info("Your score is: "+points);
+                }
+            }
+        });
 
     }
 }

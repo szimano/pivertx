@@ -1,4 +1,4 @@
-package org.szimano;
+package org.szimano.game;
 /*
  * Copyright 2013 Red Hat, Inc.
  *
@@ -22,12 +22,16 @@ import org.vertx.java.platform.Verticle;
 /*
 This is a simple Java verticle which receives `ping` messages on the event bus and sends back `pong` replies
  */
-public class StarterVerticle extends Verticle {
+public class GameStarterVerticle extends Verticle {
 
     public void start() {
 
-        getContainer().deployVerticle("org.szimano.HardwareVerticle");
-        getContainer().deployVerticle("org.szimano.ReactVerticle");
+        System.out.println("1 & 1 & 1 == 1 = " + ((1 & 1 & 1) == 1));
+
+        getContainer().deployVerticle("org.szimano.game.RandomLedVerticle"); // randomly set/unset random led
+        getContainer().deployVerticle("org.szimano.game.HardwareVerticle"); //  set/unset leds, bzyk and pstryk
+        getContainer().deployVerticle("org.szimano.game.GameSolverVerticle"); //  aggregates the states of hardware and count points
+        getContainer().deployVerticle("org.szimano.game.ScoreCheckVerticle"); //  shows points, ends game
 
     }
 }
