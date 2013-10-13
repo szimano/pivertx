@@ -29,7 +29,7 @@ public class ScoreCheckVerticle extends Verticle {
 
     public void start() {
 
-        final AtomicInteger lastPoints = new AtomicInteger(0);
+        final AtomicInteger lastPoints = new AtomicInteger(1000);
 
         vertx.setPeriodic(10, new Handler<Long>() {
             @Override

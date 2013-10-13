@@ -21,6 +21,7 @@ import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
+import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
 import org.vertx.java.core.Handler;
@@ -41,7 +42,7 @@ public class HardwareVerticle extends Verticle {
 
         System.out.println("GPIO PSTRYK LOADED");
 
-        final GpioPinDigitalInput pin = gpio.provisionDigitalInputPin(RaspiPin.GPIO_02, "MyPstryk");
+        final GpioPinDigitalInput pin = gpio.provisionDigitalInputPin(RaspiPin.GPIO_06, "MyPstryk", PinPullResistance.PULL_UP);
 
         final AtomicBoolean buttonState = new AtomicBoolean(false);
 
