@@ -42,7 +42,7 @@ public class HardwareVerticle extends Verticle {
 
         System.out.println("GPIO PSTRYK LOADED");
 
-        final GpioPinDigitalInput pin = gpio.provisionDigitalInputPin(RaspiPin.GPIO_06, "MyPstryk", PinPullResistance.PULL_UP);
+        final GpioPinDigitalInput pin = gpio.provisionDigitalInputPin(RaspiPin.GPIO_06, "MyPstryk", PinPullResistance.PULL_DOWN);
 
         final AtomicBoolean buttonState = new AtomicBoolean(false);
 
