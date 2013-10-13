@@ -24,6 +24,8 @@ import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
+import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
+import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.platform.Verticle;
@@ -42,15 +44,15 @@ public class HardwareVerticle extends Verticle {
 
         System.out.println("GPIO PSTRYK LOADED");
 
-        final GpioPinDigitalInput pin = gpio.provisionDigitalInputPin(RaspiPin.GPIO_06, "MyPstryk", PinPullResistance.PULL_DOWN);
+        final GpioPinDigitalInput button = gpio.provisionDigitalInputPin(RaspiPin.GPIO_06, "MyPstryk", PinPullResistance.PULL_DOWN);
 
         final AtomicBoolean buttonState = new AtomicBoolean(false);
 
-        vertx.setPeriodic(10, new Handler<Long>() {
+        // create and register gpio button listener
+        button.addListener(new GpioPinListenerDigital() {
             @Override
-            public void handle(Long timerID) {
-
-                int buttonValue = pin.getState().getValue();
+            public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
+                int buttonValue = event.getState().getValue();
 
                 boolean currentButtonState = buttonValue == 0 ? false : true;
                 if (buttonState.get() != currentButtonState) {
